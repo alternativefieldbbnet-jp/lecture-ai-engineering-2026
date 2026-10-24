@@ -1,4 +1,5 @@
-"""第1回: 素のLLMに1回だけ質問するスクリプト。
+"""
+第1回: 素のLLMに1回だけ質問するスクリプト。
 
 使い方:
     uv run python -m app.ask "LoRAとは何ですか？"
@@ -23,10 +24,20 @@ DEFAULT_QUESTION = "AIE2026の講座の宿題にある「3レベル」とは何�
 
 def ask(question: str) -> str:
     client = genai.Client(api_key=get_api_key())
-    response = client.models.generate_content(model=MODEL, contents=question)
 
-    # TODO(第1回 演習): response.usage_metadata から
-    #   入力トークン数と出力トークン数を表示してみよう（Copilotに頼んでよい）
+    response = client.models.generate_content(
+        model=MODEL,
+        contents=question,
+    )
+
+    # トークン使用量を表示
+    usage = response.usage_metadata
+    if usage:
+        print("\n[トークン使用量]")
+        print(f"  入力トークン数 : {usage.prompt_token_count}")
+        print(f"  出力トークン数 : {usage.candidates_token_count}")
+        print(f"  合計トークン数 : {usage.total_token_count}")
+        print()
 
     return response.text
 
@@ -38,6 +49,7 @@ def main() -> None:
 
     print(f"[model] {MODEL}")
     print(f"[質問] {args.question}\n")
+
     try:
         print(ask(args.question))
     except errors.APIError as e:
